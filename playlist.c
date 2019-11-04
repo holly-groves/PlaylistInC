@@ -346,7 +346,48 @@ int savePlaylist(Playlist *listPtr, char filename[]){
 		filename - name of the file to load from
 */
 int loadPlaylist(Playlist **listPtr, char filename[]){
-	(void)listPtr;
-	(void)filename;
-	return NOT_IMPLEMENTED;
+		if (filename == NULL) //checks that a file name has been given
+		return INVALID_INPUT_PARAMETER;
+	if (listPtr == NULL) //check that the memory address was provided
+		return INVALID_INPUT_PARAMETER;
+	if (*listPtr != NULL) //check that the list has not been created already
+		return INVALID_INPUT_PARAMETER;
+
+	/* create the playlist */
+	(*listPtr) = (Playlist*)myMalloc(sizeof(Playlist)); //allocate memory for the new list and store in the pointer
+
+	if ((*listPtr) == NULL) //check that memory allocation was successful
+		return MEMORY_ALLOCATION_ERROR;
+
+	//initialise fields in the list (playlist)
+	(*listPtr)->head = NULL;
+	(*listPtr)->tail = NULL;
+	(*listPtr)->curr = NULL;
+
+	/* open the file */
+	FILE *fp;
+	fp = fopen(filename, "r");
+
+	/* read from file and add to playlist */
+
+	char line[256];
+	// fgets(line, 256, fp);
+	char name[50];
+	int length;
+	char *str;
+	const char delim[] = "#";
+
+	while (fgets(line, 256, fp) != NULL) //while there are lines to read from
+	{
+		str = strtok(line, delim);
+		strcpy(name, str);
+		str = strtok(line, delim);
+		length = atoi(str);
+
+		insertAfterCurr(*listPtr, name, length);
+	}
+
+	fclose(fp);
+
+	return SUCCESS;
 }
